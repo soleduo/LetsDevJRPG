@@ -5,6 +5,7 @@ using System.Linq;
 
 public class TurnBasedCombatController : MonoBehaviour
 {
+    public List<CombatCharacterData> combatCharacterData;
     public List<UnitTimelineData> unitTimelineDatas;
 
     private int unitInCombat = 4;
@@ -15,10 +16,9 @@ public class TurnBasedCombatController : MonoBehaviour
     {
         unitTimelineDatas = new List<UnitTimelineData>();
 
-        for(int i = 0; i < unitInCombat; i++)
+        for(int i = 0; i < combatCharacterData.Count; i++)
         {
-            int randomSpeed = Random.Range(4, 65);
-            unitTimelineDatas.Add(new UnitTimelineData(randomSpeed));
+            unitTimelineDatas.Add(new UnitTimelineData(combatCharacterData[i].speed));
         }
 
         List<int> values = unitTimelineDatas.Select((u) => u.Value).ToList();
@@ -56,7 +56,7 @@ public class TurnBasedCombatController : MonoBehaviour
         if( activeTurn >= 0)
         { 
             int randomSpeed = Random.Range(4, 25);
-            unitTimelineDatas[activeTurn] = new UnitTimelineData(randomSpeed); //let 1 is default action value
+            unitTimelineDatas[activeTurn] = new UnitTimelineData(combatCharacterData[activeTurn].speed); //let 1 is default action value
             combatUIController.ResetUI(activeTurn, unitTimelineDatas[activeTurn].Value);
         }
 

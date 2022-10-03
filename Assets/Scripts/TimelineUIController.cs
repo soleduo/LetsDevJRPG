@@ -7,9 +7,9 @@ using UnityEngine.UI;
 public class TimelineUIController
 {
     public List<Image> turnOrderIcons;
-    private float maxTimelinePosition = 1228f;
+    private float maxTimelinePosition = 1820f;
 
-    private const int TimelineUpdateDuration = 3;
+    private const float TimelineUpdateDuration = 1.2f;
 
     public void InitializeUI(List<int> values)
     {

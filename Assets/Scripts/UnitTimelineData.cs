@@ -15,7 +15,7 @@ public class UnitTimelineData
 
         int startValue = Random.Range(baseValue, (Mathf.FloorToInt(baseValue / 3) + 1) * 3);
 
-        value = startValue;
+        value = startValue + 72;
         Debug.Log("Value " + value);
     }
 
