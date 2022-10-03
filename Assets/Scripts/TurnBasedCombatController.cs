@@ -22,7 +22,7 @@ public class TurnBasedCombatController : MonoBehaviour
         {
             int randomSpeed = Random.Range(4, 65);
             unitTimelineDatas.Add(new UnitTimelineData(randomSpeed , 0));
-            turnOrderIcons[i].rectTransform.anchoredPosition = Vector2.right * unitTimelineDatas[i].Value * maxTimelinePosition;
+            turnOrderIcons[i].rectTransform.anchoredPosition = Vector2.right * unitTimelineDatas[i].Value * 0.01f * maxTimelinePosition;
         }
 
         StartCoroutine(TurnUpdate());
@@ -37,7 +37,7 @@ public class TurnBasedCombatController : MonoBehaviour
     public IEnumerator TurnUpdate() // might be able to change this to a better async method
     {
         int activeTurn = -1; // something to store our next character to move
-        float _nearest = GetNextTurn(out activeTurn); // get the amount of "ticks" to next move
+        int _nearest = GetNextTurn(out activeTurn); // get the amount of "ticks" to next move
 
         for(int i = 0; i < unitTimelineDatas.Count; i++) //Move all UnitTimelineData for x amount
         {
@@ -47,15 +47,16 @@ public class TurnBasedCombatController : MonoBehaviour
         }
 
         //Move all timeline icons for x amounts in t seconds
-        yield return MoveUI(_nearest * maxTimelinePosition, activeTurn);
+        yield return MoveUI(_nearest * maxTimelinePosition * 0.01f, activeTurn);
 
         yield return new WaitForSeconds(3f); // wait for actions to be executed;
 
+        //reset the active character position in timeline
         if( activeTurn >= 0)
         { 
             int randomSpeed = Random.Range(4, 25);
-            unitTimelineDatas[activeTurn] = new UnitTimelineData(randomSpeed, 1f); //let 1 is default action value
-            turnOrderIcons[activeTurn].rectTransform.anchoredPosition = Vector2.right * unitTimelineDatas[activeTurn].Value * maxTimelinePosition;
+            unitTimelineDatas[activeTurn] = new UnitTimelineData(randomSpeed); //let 1 is default action value
+            turnOrderIcons[activeTurn].rectTransform.anchoredPosition = Vector2.right * unitTimelineDatas[activeTurn].Value * 0.01f * maxTimelinePosition;
         }
 
         StartCoroutine(TurnUpdate()); // repeat
@@ -66,10 +67,10 @@ public class TurnBasedCombatController : MonoBehaviour
     /// </summary>
     /// <param name="activeTurn">Character to move next</param>
     /// <returns>Amount of "ticks" for the next character to move</returns>
-    public float GetNextTurn(out int activeTurn)
+    public int GetNextTurn(out int activeTurn)
     {
         activeTurn = -1;
-        float _nearest = 9999f;
+        int _nearest = 9999;
 
         // get nearest character by distance to action timeline 0 point
         for(int i = 0; i < unitTimelineDatas.Count; i++)
