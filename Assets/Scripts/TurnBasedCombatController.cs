@@ -2,16 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class TurnBasedCombatController : MonoBehaviour
 {
-    public List<Image> turnOrderIcons;
     public List<UnitTimelineData> unitTimelineDatas;
 
-    private float maxTimelinePosition = 1228f;
-    private const int TimelineUpdateDuration = 3;
-
     private int unitInCombat = 4;
+    [SerializeField]private CombatUIController combatUIController;
 
     // Start is called before the first frame update
     void Start()
@@ -22,8 +20,12 @@ public class TurnBasedCombatController : MonoBehaviour
         {
             int randomSpeed = Random.Range(4, 65);
             unitTimelineDatas.Add(new UnitTimelineData(randomSpeed , 0));
-            turnOrderIcons[i].rectTransform.anchoredPosition = Vector2.right * unitTimelineDatas[i].Value * 0.01f * maxTimelinePosition;
         }
+
+        List<int> values = unitTimelineDatas.Select((u) => u.Value).ToList();
+        Debug.Log(values.Count);
+
+        combatUIController.InitializeUI(values);
 
         StartCoroutine(TurnUpdate());
     }
@@ -47,7 +49,7 @@ public class TurnBasedCombatController : MonoBehaviour
         }
 
         //Move all timeline icons for x amounts in t seconds
-        yield return MoveUI(_nearest * maxTimelinePosition * 0.01f, activeTurn);
+        yield return combatUIController.MoveUI(_nearest * 0.01f, activeTurn);
 
         yield return new WaitForSeconds(3f); // wait for actions to be executed;
 
@@ -56,7 +58,7 @@ public class TurnBasedCombatController : MonoBehaviour
         { 
             int randomSpeed = Random.Range(4, 25);
             unitTimelineDatas[activeTurn] = new UnitTimelineData(randomSpeed); //let 1 is default action value
-            turnOrderIcons[activeTurn].rectTransform.anchoredPosition = Vector2.right * unitTimelineDatas[activeTurn].Value * 0.01f * maxTimelinePosition;
+            combatUIController.ResetUI(activeTurn, unitTimelineDatas[activeTurn].Value);
         }
 
         StartCoroutine(TurnUpdate()); // repeat
@@ -87,8 +89,33 @@ public class TurnBasedCombatController : MonoBehaviour
         return _nearest;
     }
 
+    
+}
+
+[System.Serializable]
+public class CombatUIController
+{
+    public List<Image> turnOrderIcons;
+    private float maxTimelinePosition = 1228f;
+
+    private const int TimelineUpdateDuration = 3;
+
+    public void InitializeUI(List<int> values)
+    {
+        for (int i = 0; i < values.Count; i++)
+        {
+            turnOrderIcons[i].rectTransform.anchoredPosition = Vector2.right * values[i] * 0.01f * maxTimelinePosition;
+        }
+    }
+
+    public void ResetUI(int activeTurn, int value)
+    {
+        turnOrderIcons[activeTurn].rectTransform.anchoredPosition = Vector2.right * value * 0.01f * maxTimelinePosition;
+    }
+
     public IEnumerator MoveUI(float totalReduction, int activeTurn)
     {
+        totalReduction *= maxTimelinePosition;
         float moveSpeed = (totalReduction / TimelineUpdateDuration);
         while (turnOrderIcons[activeTurn].rectTransform.anchoredPosition.x > 0)
         {
