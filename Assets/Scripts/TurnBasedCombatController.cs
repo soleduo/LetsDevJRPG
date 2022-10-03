@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using System.Linq;
 
 public class TurnBasedCombatController : MonoBehaviour
@@ -9,7 +8,7 @@ public class TurnBasedCombatController : MonoBehaviour
     public List<UnitTimelineData> unitTimelineDatas;
 
     private int unitInCombat = 4;
-    [SerializeField]private CombatUIController combatUIController;
+    [SerializeField]private TimelineUIController combatUIController;
 
     // Start is called before the first frame update
     void Start()
@@ -19,7 +18,7 @@ public class TurnBasedCombatController : MonoBehaviour
         for(int i = 0; i < unitInCombat; i++)
         {
             int randomSpeed = Random.Range(4, 65);
-            unitTimelineDatas.Add(new UnitTimelineData(randomSpeed , 0));
+            unitTimelineDatas.Add(new UnitTimelineData(randomSpeed));
         }
 
         List<int> values = unitTimelineDatas.Select((u) => u.Value).ToList();
@@ -90,41 +89,4 @@ public class TurnBasedCombatController : MonoBehaviour
     }
 
     
-}
-
-[System.Serializable]
-public class CombatUIController
-{
-    public List<Image> turnOrderIcons;
-    private float maxTimelinePosition = 1228f;
-
-    private const int TimelineUpdateDuration = 3;
-
-    public void InitializeUI(List<int> values)
-    {
-        for (int i = 0; i < values.Count; i++)
-        {
-            turnOrderIcons[i].rectTransform.anchoredPosition = Vector2.right * values[i] * 0.01f * maxTimelinePosition;
-        }
-    }
-
-    public void ResetUI(int activeTurn, int value)
-    {
-        turnOrderIcons[activeTurn].rectTransform.anchoredPosition = Vector2.right * value * 0.01f * maxTimelinePosition;
-    }
-
-    public IEnumerator MoveUI(float totalReduction, int activeTurn)
-    {
-        totalReduction *= maxTimelinePosition;
-        float moveSpeed = (totalReduction / TimelineUpdateDuration);
-        while (turnOrderIcons[activeTurn].rectTransform.anchoredPosition.x > 0)
-        {
-            for (int i = 0; i < turnOrderIcons.Count; i++)
-            {
-                turnOrderIcons[i].rectTransform.anchoredPosition -= Vector2.right * moveSpeed * Time.deltaTime;
-            }
-
-            yield return null;
-        }
-    }
 }
