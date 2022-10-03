@@ -8,17 +8,23 @@ public class TurnBasedCombatController : MonoBehaviour
     public List<CombatCharacterData> combatCharacterData;
     public List<UnitTimelineData> unitTimelineDatas;
 
-    private int unitInCombat = 4;
-    [SerializeField]private TimelineUIController combatUIController;
+    public List<CombatCharacterController> characterController;
+
+    [SerializeField] private TimelineUIController combatUIController;
 
     // Start is called before the first frame update
     void Start()
     {
         unitTimelineDatas = new List<UnitTimelineData>();
+        characterController = new List<CombatCharacterController>();
 
         for(int i = 0; i < combatCharacterData.Count; i++)
         {
             unitTimelineDatas.Add(new UnitTimelineData(combatCharacterData[i].speed));
+            if (combatCharacterData[i].name == "Enemy")
+                characterController.Add(new AICombatController(combatCharacterData[i].name));
+            else
+                characterController.Add(new PlayerCombatController(combatCharacterData[i].name));
         }
 
         List<int> values = unitTimelineDatas.Select((u) => u.Value).ToList();
@@ -50,12 +56,12 @@ public class TurnBasedCombatController : MonoBehaviour
         //Move all timeline icons for x amounts in t seconds
         yield return combatUIController.MoveUI(_nearest * 0.01f, activeTurn);
 
-        yield return new WaitForSeconds(3f); // wait for actions to be executed;
+
+        yield return characterController[activeTurn].ActivateTurn();
 
         //reset the active character position in timeline
         if( activeTurn >= 0)
         { 
-            int randomSpeed = Random.Range(4, 25);
             unitTimelineDatas[activeTurn] = new UnitTimelineData(combatCharacterData[activeTurn].speed); //let 1 is default action value
             combatUIController.ResetUI(activeTurn, unitTimelineDatas[activeTurn].Value);
         }
