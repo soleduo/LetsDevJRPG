@@ -3,8 +3,8 @@ using UnityEngine;
 
 public abstract class CombatCharacterController
 {
-    protected string queuedCommand = string.Empty;
-    protected string owner;
+    protected CombatCommandBase queuedCommand;
+    protected CombatCharacterData owner;
 
     public abstract IEnumerator ActivateTurn();
 }
@@ -13,27 +13,32 @@ public delegate void VoidEvent();
 
 public class PlayerCombatController : CombatCharacterController
 {
-    public PlayerCombatController(string owner)
+    public PlayerCombatController(CombatCharacterData owner)
     {
         this.owner = owner;
     }
 
     public override IEnumerator ActivateTurn()
     {
-        GUIMessageHelper.PrintConsole("Character Turn: " + owner);
+        GUIMessageHelper.PrintConsole("Character Turn: " + owner.name);
 
         //activate player ui
         GUIMessageHelper.PrintConsole("Click the enemy to Attack");
-        DebugClickEnemy.Instance.onClick += () => queuedCommand = "Attack";
+        DebugClickEnemy.Instance.onClick += () => queuedCommand = owner.Commands[0];
 
         // select action
-        yield return new WaitUntil(() => queuedCommand != string.Empty);
+        yield return new WaitUntil(() => queuedCommand != null);
         // select target
+        AttackCommand _command = (AttackCommand)queuedCommand;
+        _command.SetTarget(TurnBasedCombatController.Instance.combatCharacterData[0]);
+
+        yield return new WaitUntil(() => queuedCommand.IsInitialized);
+
+        queuedCommand.Execute();
 
         // do action
-        GUIMessageHelper.PrintConsole(owner +" do Action: " + queuedCommand);
         yield return new WaitForSeconds(3f);
-        queuedCommand = string.Empty;
+        queuedCommand = null;
 
         // end turn
         yield return true;
@@ -42,22 +47,25 @@ public class PlayerCombatController : CombatCharacterController
 
 public class AICombatController : CombatCharacterController
 {
-    public AICombatController(string owner)
+    public AICombatController(CombatCharacterData owner)
     {
         this.owner = owner;
-        queuedCommand = "Attack";
+        queuedCommand = owner.Commands[0];
     }
 
     public override IEnumerator ActivateTurn()
     {
-        GUIMessageHelper.PrintConsole("Character Turn: " + owner);
+        GUIMessageHelper.PrintConsole("Character Turn: " + owner.name);
+        AttackCommand _command = (AttackCommand)queuedCommand;
+
+        _command.SetTarget(TurnBasedCombatController.Instance.combatCharacterData[1]);
+        _command.Execute();
 
         // do action
-        GUIMessageHelper.PrintConsole(owner + " do Action: " + queuedCommand);
         yield return new WaitForSeconds(3f);
 
         // select new action
-        queuedCommand = "Attack";
+        queuedCommand = owner.Commands[0];
 
         // end turn
         yield return true;

@@ -5,12 +5,19 @@ using System.Linq;
 
 public class TurnBasedCombatController : MonoBehaviour
 {
+    public static TurnBasedCombatController Instance { get; private set; }
+
     public List<CombatCharacterData> combatCharacterData;
     public List<UnitTimelineData> unitTimelineDatas;
 
     public List<CombatCharacterController> characterController;
 
     [SerializeField] private TimelineUIController combatUIController;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -20,17 +27,19 @@ public class TurnBasedCombatController : MonoBehaviour
 
         for(int i = 0; i < combatCharacterData.Count; i++)
         {
+            combatCharacterData[i].CreateCommands();
+
             unitTimelineDatas.Add(new UnitTimelineData(combatCharacterData[i].speed));
             if (combatCharacterData[i].name == "Enemy")
-                characterController.Add(new AICombatController(combatCharacterData[i].name));
+                characterController.Add(new AICombatController(combatCharacterData[i]));
             else
-                characterController.Add(new PlayerCombatController(combatCharacterData[i].name));
+                characterController.Add(new PlayerCombatController(combatCharacterData[i]));
         }
 
         List<int> values = unitTimelineDatas.Select((u) => u.Value).ToList();
         Debug.Log(values.Count);
 
-        combatUIController.InitializeUI(values);
+        combatUIController.Initialize(values);
 
         StartCoroutine(TurnUpdate());
     }
@@ -54,7 +63,7 @@ public class TurnBasedCombatController : MonoBehaviour
         }
 
         //Move all timeline icons for x amounts in t seconds
-        yield return combatUIController.MoveUI(_nearest * 0.01f, activeTurn);
+        yield return combatUIController.Move(_nearest * 0.01f, activeTurn);
 
 
         yield return characterController[activeTurn].ActivateTurn();
@@ -63,7 +72,7 @@ public class TurnBasedCombatController : MonoBehaviour
         if( activeTurn >= 0)
         { 
             unitTimelineDatas[activeTurn] = new UnitTimelineData(combatCharacterData[activeTurn].speed); //let 1 is default action value
-            combatUIController.ResetUI(activeTurn, unitTimelineDatas[activeTurn].Value);
+            combatUIController.Reset(activeTurn, unitTimelineDatas[activeTurn].Value);
         }
 
         StartCoroutine(TurnUpdate()); // repeat

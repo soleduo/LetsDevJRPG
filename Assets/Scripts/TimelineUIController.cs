@@ -11,7 +11,7 @@ public class TimelineUIController
 
     private const float TimelineUpdateDuration = 1.2f;
 
-    public void InitializeUI(List<int> values)
+    public void Initialize(List<int> values)
     {
         for (int i = 0; i < values.Count; i++)
         {
@@ -19,12 +19,12 @@ public class TimelineUIController
         }
     }
 
-    public void ResetUI(int activeTurn, int value)
+    public void Reset(int activeTurn, int value)
     {
         turnOrderIcons[activeTurn].rectTransform.anchoredPosition = Vector2.right * value * 0.01f * maxTimelinePosition;
     }
 
-    public IEnumerator MoveUI(float totalReduction, int activeTurn)
+    public IEnumerator Move(float totalReduction, int activeTurn)
     {
         totalReduction *= maxTimelinePosition;
         float moveSpeed = (totalReduction / TimelineUpdateDuration);

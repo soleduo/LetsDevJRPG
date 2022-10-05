@@ -12,5 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb6ca0f5e4249104ea11cdfa5dc17930, type: 3}
   m_Name: Player
   m_EditorClassIdentifier: 
-  speed: 0
-  attackValue: 0
+  maxHitPoint: 50
+  currentHitPoint: 50
+  attack: 12
+  speed: 16
+  commands:
+  - name: Attack
+    value: 50
+    type: 0
