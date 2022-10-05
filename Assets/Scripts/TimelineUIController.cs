@@ -3,19 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[System.Serializable]
-public class TimelineUIController
+public class TimelineUIController : MonoBehaviour
 {
     public List<Image> turnOrderIcons;
-    private float maxTimelinePosition = 1820f;
+    public RectTransform container;
 
-    private const float TimelineUpdateDuration = 1.2f;
+    private float maxTimelinePosition;
 
-    public void Initialize(List<int> values)
+    private const float maxDuration = 1.2f;
+
+    public void Initialize(List<UnitTimeline> unitTimelines)
     {
-        for (int i = 0; i < values.Count; i++)
+        maxTimelinePosition = container.rect.width;
+        CombatUtility.TimelineSpeed = maxTimelinePosition * 0.01f / maxDuration;
+        Debug.Log("Timeline Speed " + CombatUtility.TimelineSpeed);
+
+        for (int i = 0; i < unitTimelines.Count; i++)
         {
-            turnOrderIcons[i].rectTransform.anchoredPosition = Vector2.right * values[i] * 0.01f * maxTimelinePosition;
+            int index = i;
+            turnOrderIcons[i].rectTransform.anchoredPosition = Vector2.right * unitTimelines[i].Value * 0.01f * maxTimelinePosition;
+            unitTimelines[i].onValueChanged += (value) => RefreshPosition(index, value);
         }
     }
 
@@ -24,18 +31,13 @@ public class TimelineUIController
         turnOrderIcons[activeTurn].rectTransform.anchoredPosition = Vector2.right * value * 0.01f * maxTimelinePosition;
     }
 
-    public IEnumerator Move(float totalReduction, int activeTurn)
+    public void RefreshPosition(int index, float value)
     {
-        totalReduction *= maxTimelinePosition;
-        float moveSpeed = (totalReduction / TimelineUpdateDuration);
-        while (turnOrderIcons[activeTurn].rectTransform.anchoredPosition.x > 0)
-        {
-            for (int i = 0; i < turnOrderIcons.Count; i++)
-            {
-                turnOrderIcons[i].rectTransform.anchoredPosition -= Vector2.right * moveSpeed * Time.deltaTime;
-            }
-
-            yield return null;
-        }
+        turnOrderIcons[index].rectTransform.anchoredPosition = Vector2.right * value * 0.01f * maxTimelinePosition;
     }
+}
+
+public static class CombatUtility
+{
+    public static float TimelineSpeed = -1f;
 }

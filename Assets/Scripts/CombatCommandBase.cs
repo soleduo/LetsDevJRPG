@@ -30,7 +30,7 @@ public abstract class TargettedCommand<T1, T2> : CombatCommandBase<T1>
     protected T2 target;
 }
 
-public class AttackCommand : TargettedCommand<CombatCharacterData, CombatCharacterData>
+public class AttackCommand : TargettedCommand<UnitData, Unit>
 {
     private bool isInitialized = false;
     private bool isExecuted = false;
@@ -40,7 +40,7 @@ public class AttackCommand : TargettedCommand<CombatCharacterData, CombatCharact
     public override bool IsInitialized => isInitialized;
     public override bool IsExecuted => isExecuted;
 
-    public AttackCommand(CombatCharacterData owner, string name, int value, System.Action additionalEffects = null)
+    public AttackCommand(UnitData owner, string name, int value, System.Action additionalEffects = null)
     {
         this.owner = owner;
         this.name = name;
@@ -61,7 +61,7 @@ public class AttackCommand : TargettedCommand<CombatCharacterData, CombatCharact
             onExecuted += additionalEffects.Invoke;
     }
 
-    public void SetTarget(CombatCharacterData target)
+    public void SetTarget(Unit target)
     {
         this.target = target;
 
@@ -71,9 +71,10 @@ public class AttackCommand : TargettedCommand<CombatCharacterData, CombatCharact
     public override void Execute()
     {
         int _damage = Mathf.FloorToInt(value * owner.attack * 0.01f);
-        target.currentHitPoint -= _damage;
-
         GUIMessageHelper.PrintConsole(string.Format("Attack Command: {2} use {0} to {3} for {1} damage", name, _damage, owner.name, target.name));
+
+        target.DoDamage(_damage);
+
         isExecuted = true;
 
         onExecuted?.Invoke();
@@ -83,7 +84,7 @@ public class AttackCommand : TargettedCommand<CombatCharacterData, CombatCharact
     }
 }
 
-public class SupportCommand : TargettedCommand<CombatCharacterData,string>
+public class SupportCommand : TargettedCommand<UnitData,string>
 {
     private event VoidEvent onExecuted;
 
@@ -91,7 +92,7 @@ public class SupportCommand : TargettedCommand<CombatCharacterData,string>
 
     public override bool IsExecuted => throw new System.NotImplementedException();
 
-    public SupportCommand(CombatCharacterData owner, string name, System.Action onExecution = null)
+    public SupportCommand(UnitData owner, string name, System.Action onExecution = null)
     {
         this.owner = owner;
         this.name = name;
@@ -151,14 +152,14 @@ public class MoveCommand : TargettedCommand<NavMeshAgent,Vector3>
 [System.Serializable]
 public class CommandData
 {
-    public CombatCharacterData owner { get; private set; }
+    public UnitData owner { get; private set; }
     public string name;
     public int value;
     public ECommandType type;
 
 
 
-    public CombatCommandBase Create(CombatCharacterData data)
+    public CombatCommandBase Create(UnitData data)
     {
         owner = data;
 

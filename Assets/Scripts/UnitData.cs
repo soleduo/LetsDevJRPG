@@ -9,7 +9,7 @@ using UnityEngine;
         fileName = "CharacterData.asset",
         menuName = "ScriptableObjects/Game Data/Character Data",
         order = 0)]
-public class CombatCharacterData : ScriptableObject
+public class UnitData : ScriptableObject
 {
     public int maxHitPoint;
     public int currentHitPoint;

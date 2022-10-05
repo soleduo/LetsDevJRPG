@@ -7,12 +7,26 @@ public class TurnBasedCombatController : MonoBehaviour
 {
     public static TurnBasedCombatController Instance { get; private set; }
 
-    public List<CombatCharacterData> combatCharacterData;
-    public List<UnitTimelineData> unitTimelineDatas;
+    public List<Unit> unitsInCombat;
+    public TimelineUIController timelineController;
 
-    public List<CombatCharacterController> characterController;
+    private int playerCount= 0;
+    private int enemyCount= 0;
 
-    [SerializeField] private TimelineUIController combatUIController;
+    public void OnUnitFallen(EUnitControlType type)
+    {
+        if (type == EUnitControlType.PLAYER)
+            playerCount--;
+
+        if (type == EUnitControlType.AI)
+            enemyCount--;
+
+        if (playerCount <= 0)
+            CombatEnd(false);
+
+        if (enemyCount <= 0)
+            CombatEnd(true);
+    }
 
     private void Awake()
     {
@@ -22,34 +36,52 @@ public class TurnBasedCombatController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        unitTimelineDatas = new List<UnitTimelineData>();
-        characterController = new List<CombatCharacterController>();
-
-        for(int i = 0; i < combatCharacterData.Count; i++)
+        List<UnitTimeline> timelines = new List<UnitTimeline>();
+        for(int i =0; i < unitsInCombat.Count; i++)
         {
-            combatCharacterData[i].CreateCommands();
+            unitsInCombat[i].onTurnStart += (turn)=>StartCoroutine(WaitForCommandExecution(turn));
+            timelines.Add(unitsInCombat[i].Timeline);
 
-            unitTimelineDatas.Add(new UnitTimelineData(combatCharacterData[i].speed));
-            if (combatCharacterData[i].name == "Enemy")
-                characterController.Add(new AICombatController(combatCharacterData[i]));
-            else
-                characterController.Add(new PlayerCombatController(combatCharacterData[i]));
+            if (unitsInCombat[i].UnitType == EUnitControlType.PLAYER)
+                playerCount++;
+            if (unitsInCombat[i].UnitType == EUnitControlType.AI)
+                enemyCount++;
+
+            unitsInCombat[i].onUnitFallen += OnUnitFallen;
         }
 
-        List<int> values = unitTimelineDatas.Select((u) => u.Value).ToList();
-        Debug.Log(values.Count);
-
-        combatUIController.Initialize(values);
-
-        StartCoroutine(TurnUpdate());
+        timelineController.Initialize(timelines);
     }
 
-    // Update is called once per frame
-    void Update()
+
+
+    IEnumerator WaitForCommandExecution(UnitController activeUnit)
     {
-        
+        for(int i = 0; i < unitsInCombat.Count; i++)
+        {
+            unitsInCombat[i].enabled = false;
+        }
+
+        yield return activeUnit.ActivateTurn();
+
+        for (int i = 0; i < unitsInCombat.Count; i++)
+        {
+            unitsInCombat[i].enabled = true;
+        }
     }
 
+    void CombatEnd(bool isWinning)
+    {
+        StopAllCoroutines();
+
+        GUIMessageHelper.PrintConsole(isWinning ? "Player Wins!" : "Game Over");
+
+        for (int i = 0; i < unitsInCombat.Count; i++)
+        {
+            unitsInCombat[i].enabled = false;
+        }
+    }
+/*
     public IEnumerator TurnUpdate() // might be able to change this to a better async method
     {
         int activeTurn = -1; // something to store our next character to move
@@ -57,7 +89,7 @@ public class TurnBasedCombatController : MonoBehaviour
 
         for(int i = 0; i < unitTimelineDatas.Count; i++) //Move all UnitTimelineData for x amount
         {
-            unitTimelineDatas[i].UpdateValue(_nearest);
+            unitTimelineDatas[i].Update(_nearest);
 
             yield return null;
         }
@@ -103,5 +135,5 @@ public class TurnBasedCombatController : MonoBehaviour
         return _nearest;
     }
 
-    
+*/
 }

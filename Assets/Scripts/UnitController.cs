@@ -1,19 +1,19 @@
 using System.Collections;
 using UnityEngine;
 
-public abstract class CombatCharacterController
+public abstract class UnitController
 {
     protected CombatCommandBase queuedCommand;
-    protected CombatCharacterData owner;
+    protected UnitData owner;
 
     public abstract IEnumerator ActivateTurn();
 }
 
 public delegate void VoidEvent();
 
-public class PlayerCombatController : CombatCharacterController
+public class PlayerCombatController : UnitController
 {
-    public PlayerCombatController(CombatCharacterData owner)
+    public PlayerCombatController(UnitData owner)
     {
         this.owner = owner;
     }
@@ -30,7 +30,7 @@ public class PlayerCombatController : CombatCharacterController
         yield return new WaitUntil(() => queuedCommand != null);
         // select target
         AttackCommand _command = (AttackCommand)queuedCommand;
-        _command.SetTarget(TurnBasedCombatController.Instance.combatCharacterData[0]);
+        _command.SetTarget(TurnBasedCombatController.Instance.unitsInCombat[0]);
 
         yield return new WaitUntil(() => queuedCommand.IsInitialized);
 
@@ -45,9 +45,9 @@ public class PlayerCombatController : CombatCharacterController
     }
 }
 
-public class AICombatController : CombatCharacterController
+public class AICombatController : UnitController
 {
-    public AICombatController(CombatCharacterData owner)
+    public AICombatController(UnitData owner)
     {
         this.owner = owner;
         queuedCommand = owner.Commands[0];
@@ -58,7 +58,7 @@ public class AICombatController : CombatCharacterController
         GUIMessageHelper.PrintConsole("Character Turn: " + owner.name);
         AttackCommand _command = (AttackCommand)queuedCommand;
 
-        _command.SetTarget(TurnBasedCombatController.Instance.combatCharacterData[1]);
+        _command.SetTarget(TurnBasedCombatController.Instance.unitsInCombat[1]);
         _command.Execute();
 
         // do action
