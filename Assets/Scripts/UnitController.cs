@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class UnitController
 {
-    protected CombatCommandBase queuedCommand;
+    protected AbilityBase queuedCommand;
     protected UnitData owner;
 
     public abstract IEnumerator ActivateTurn();
@@ -23,13 +23,13 @@ public class PlayerCombatController : UnitController
         GUIMessageHelper.PrintConsole("Character Turn: " + owner.name);
 
         //activate player ui
-        GUIMessageHelper.PrintConsole("Click the enemy to Attack");
-        DebugClickEnemy.Instance.onClick += () => queuedCommand = owner.Commands[0];
+        GUIMessageHelper.PrintConsole("Select command");
+        CombatMenuUI.Instance.Setup(owner.Commands, (_command)=> { SetQueuedCommand(_command); });
 
         // select action
         yield return new WaitUntil(() => queuedCommand != null);
         // select target
-        AttackCommand _command = (AttackCommand)queuedCommand;
+        Ability_Attack _command = (Ability_Attack)queuedCommand;
         _command.SetTarget(TurnBasedCombatController.Instance.unitsInCombat[0]);
 
         yield return new WaitUntil(() => queuedCommand.IsInitialized);
@@ -37,11 +37,15 @@ public class PlayerCombatController : UnitController
         queuedCommand.Execute();
 
         // do action
-        yield return new WaitForSeconds(3f);
         queuedCommand = null;
 
         // end turn
         yield return true;
+    }
+
+    public void SetQueuedCommand(AbilityBase _command)
+    {
+        queuedCommand = _command;
     }
 }
 
@@ -56,13 +60,10 @@ public class AICombatController : UnitController
     public override IEnumerator ActivateTurn()
     {
         GUIMessageHelper.PrintConsole("Character Turn: " + owner.name);
-        AttackCommand _command = (AttackCommand)queuedCommand;
+        Ability_Attack _command = (Ability_Attack)queuedCommand;
 
         _command.SetTarget(TurnBasedCombatController.Instance.unitsInCombat[1]);
         _command.Execute();
-
-        // do action
-        yield return new WaitForSeconds(3f);
 
         // select new action
         queuedCommand = owner.Commands[0];

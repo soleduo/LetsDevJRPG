@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public abstract class CombatCommandBase<T> : CombatCommandBase
+public abstract class AbilityBase<T> : AbilityBase
 {
     protected new T owner;
     
 }
 
-public abstract class CombatCommandBase
+public abstract class AbilityBase
 {
     protected string owner;
     protected string name;
-    protected int value;
 
     public abstract bool IsInitialized { get; }
     public abstract bool IsExecuted { get; }
+    public string Name { get { return name; } }
 
     public abstract void Execute();
     public virtual int GetOwner()
@@ -25,12 +25,13 @@ public abstract class CombatCommandBase
     }
 }
 
-public abstract class TargettedCommand<T1, T2> : CombatCommandBase<T1>
+public abstract class TargettedAbility<T1, T2> : AbilityBase<T1>
 {
     protected T2 target;
+    protected int value;
 }
 
-public class AttackCommand : TargettedCommand<UnitData, Unit>
+public class Ability_Attack : TargettedAbility<UnitData, Unit>
 {
     private bool isInitialized = false;
     private bool isExecuted = false;
@@ -40,7 +41,7 @@ public class AttackCommand : TargettedCommand<UnitData, Unit>
     public override bool IsInitialized => isInitialized;
     public override bool IsExecuted => isExecuted;
 
-    public AttackCommand(UnitData owner, string name, int value, System.Action additionalEffects = null)
+    public Ability_Attack(UnitData owner, string name, int value, System.Action additionalEffects = null)
     {
         this.owner = owner;
         this.name = name;
@@ -51,7 +52,7 @@ public class AttackCommand : TargettedCommand<UnitData, Unit>
             onExecuted += additionalEffects.Invoke;
     }
 
-    public AttackCommand(CommandData baseCommand, System.Action additionalEffects = null)
+    public Ability_Attack(AbilityData baseCommand, System.Action additionalEffects = null)
     {
         owner = baseCommand.owner;
         name = baseCommand.name;
@@ -84,7 +85,7 @@ public class AttackCommand : TargettedCommand<UnitData, Unit>
     }
 }
 
-public class SupportCommand : TargettedCommand<UnitData,string>
+public class Ability_Support : TargettedAbility<UnitData, Unit>
 {
     private event VoidEvent onExecuted;
 
@@ -92,13 +93,13 @@ public class SupportCommand : TargettedCommand<UnitData,string>
 
     public override bool IsExecuted => throw new System.NotImplementedException();
 
-    public SupportCommand(UnitData owner, string name, System.Action onExecution = null)
+    public Ability_Support(UnitData owner, string name, System.Action onExecution = null)
     {
         this.owner = owner;
         this.name = name;
     }
 
-    public SupportCommand(CommandData baseCommand, System.Action additionalEffects = null)
+    public Ability_Support(AbilityData baseCommand, System.Action additionalEffects = null)
     {
         owner = baseCommand.owner;
         name = baseCommand.name;
@@ -114,7 +115,31 @@ public class SupportCommand : TargettedCommand<UnitData,string>
     }
 }
 
-public class MoveCommand : TargettedCommand<NavMeshAgent,Vector3>
+public class Ability_Passive : AbilityBase<UnitData>
+{
+    public override bool IsInitialized => throw new System.NotImplementedException();
+
+    public override bool IsExecuted => throw new System.NotImplementedException();
+
+    public Ability_Passive(UnitData owner, string name, int value)
+    {
+        this.owner = owner;
+        this.name = name;
+    }
+
+    public Ability_Passive(AbilityData data)
+    {
+        owner = data.owner;
+        name = data.name;
+    }
+
+    public override void Execute()
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+public class MoveCommand : TargettedAbility<NavMeshAgent,Vector3>
 {
     private bool isInitialized = false;
 
@@ -149,40 +174,9 @@ public class MoveCommand : TargettedCommand<NavMeshAgent,Vector3>
     }
 }
 
-[System.Serializable]
-public class CommandData
-{
-    public UnitData owner { get; private set; }
-    public string name;
-    public int value;
-    public ECommandType type;
-
-
-
-    public CombatCommandBase Create(UnitData data)
-    {
-        owner = data;
-
-        CombatCommandBase c = null;
-
-        switch (type)
-        {
-            case ECommandType.ATTACK:
-                c = new AttackCommand(this);
-                break;
-            case ECommandType.SUPPORT:
-                c = new SupportCommand(this);
-                break;
-            default:
-                break;
-        }
-
-        return c;
-    }
-}
-
-public enum ECommandType
+public enum EAbilityType
 {
     ATTACK,
-    SUPPORT
+    SUPPORT,
+    PASSIVE
 }

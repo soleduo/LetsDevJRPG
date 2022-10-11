@@ -36,16 +36,6 @@ public class Unit : MonoBehaviour
         gameObject.name = data.name;
     }
 
-    private void Update()
-    {
-        if (Timeline.Value <= 0)
-        {
-            onTurnStart?.Invoke(Controller);
-        }
-
-        Timeline.Update();
-    }
-
     public void DoDamage(int damage)
     {
         hitPoint -= damage;

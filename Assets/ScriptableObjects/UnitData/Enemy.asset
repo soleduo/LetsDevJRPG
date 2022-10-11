@@ -10,13 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb6ca0f5e4249104ea11cdfa5dc17930, type: 3}
-  m_Name: Player
+  m_Name: Enemy
   m_EditorClassIdentifier: 
-  maxHitPoint: 50
-  currentHitPoint: 50
-  attack: 12
-  speed: 16
+  maxHitPoint: 32
+  currentHitPoint: 32
+  attack: 20
+  speed: 12
   commands:
-  - name: Attack
-    value: 50
-    type: 0
+  - {fileID: 11400000, guid: da5cac188a3f6594898c67361645081f, type: 2}

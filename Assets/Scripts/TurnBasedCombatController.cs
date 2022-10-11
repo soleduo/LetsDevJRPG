@@ -10,6 +10,9 @@ public class TurnBasedCombatController : MonoBehaviour
     public List<Unit> unitsInCombat;
     public TimelineUIController timelineController;
 
+    List<UnitTimeline> timelines = new List<UnitTimeline>();
+
+
     private int playerCount= 0;
     private int enemyCount= 0;
 
@@ -36,10 +39,9 @@ public class TurnBasedCombatController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        List<UnitTimeline> timelines = new List<UnitTimeline>();
         for(int i =0; i < unitsInCombat.Count; i++)
         {
-            unitsInCombat[i].onTurnStart += (turn)=>StartCoroutine(WaitForCommandExecution(turn));
+            unitsInCombat[i].onTurnStart += (turn)=>StartCoroutine(WaitForCommandExecution(turn, timelines[i]));
             timelines.Add(unitsInCombat[i].Timeline);
 
             if (unitsInCombat[i].UnitType == EUnitControlType.PLAYER)
@@ -51,23 +53,36 @@ public class TurnBasedCombatController : MonoBehaviour
         }
 
         timelineController.Initialize(timelines);
+        StartCoroutine(CombatUpdate());
     }
 
-
-
-    IEnumerator WaitForCommandExecution(UnitController activeUnit)
+    private IEnumerator CombatUpdate()
     {
-        for(int i = 0; i < unitsInCombat.Count; i++)
-        {
-            unitsInCombat[i].enabled = false;
+        int activeIndex = -1;
+
+        while (activeIndex < 0) {
+            for (int i = 0; i < timelines.Count; i++)
+            {
+                timelines[i].Update();
+            }
+
+            activeIndex = timelines.FindIndex((i) => i.Value <= 0);
+
+            yield return null;
         }
 
+        yield return WaitForCommandExecution(unitsInCombat[activeIndex].Controller, timelines[activeIndex]);
+
+        yield return CombatUpdate();
+    }
+
+    IEnumerator WaitForCommandExecution(UnitController activeUnit, UnitTimeline timeline)
+    {
         yield return activeUnit.ActivateTurn();
 
-        for (int i = 0; i < unitsInCombat.Count; i++)
-        {
-            unitsInCombat[i].enabled = true;
-        }
+        timeline.Update();
+
+        yield return new WaitForSeconds(2f);
     }
 
     void CombatEnd(bool isWinning)

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb6ca0f5e4249104ea11cdfa5dc17930, type: 3}
+  m_Name: Player
+  m_EditorClassIdentifier: 
+  maxHitPoint: 50
+  currentHitPoint: 50
+  attack: 12
+  speed: 200
+  commands:
+  - {fileID: 11400000, guid: 90090548f68b3cc4d9e01e7d2bb484c9, type: 2}
+  - {fileID: 11400000, guid: 2223fd44efcde3e4db416777d6fcf4b0, type: 2}
+  - {fileID: 11400000, guid: d375560b74c9b2e4bb7f1f88a39e4707, type: 2}

@@ -12,11 +12,15 @@ public class TimelineUIController : MonoBehaviour
 
     private const float maxDuration = 1.2f;
 
+    private bool[] updated;
+
     public void Initialize(List<UnitTimeline> unitTimelines)
     {
         maxTimelinePosition = container.rect.width;
         CombatUtility.TimelineSpeed = maxTimelinePosition * 0.01f / maxDuration;
         Debug.Log("Timeline Speed " + CombatUtility.TimelineSpeed);
+
+        updated = new bool[unitTimelines.Count];
 
         for (int i = 0; i < unitTimelines.Count; i++)
         {
@@ -26,6 +30,11 @@ public class TimelineUIController : MonoBehaviour
         }
     }
 
+    private void LateUpdate()
+    {
+        updated = new bool[updated.Length];
+    }
+
     public void Reset(int activeTurn, int value)
     {
         turnOrderIcons[activeTurn].rectTransform.anchoredPosition = Vector2.right * value * 0.01f * maxTimelinePosition;
@@ -33,7 +42,12 @@ public class TimelineUIController : MonoBehaviour
 
     public void RefreshPosition(int index, float value)
     {
-        turnOrderIcons[index].rectTransform.anchoredPosition = Vector2.right * value * 0.01f * maxTimelinePosition;
+        if (!updated[index])
+        {
+            value = Mathf.Clamp(value, 0, 100);
+            turnOrderIcons[index].rectTransform.anchoredPosition = Vector2.right * value * 0.01f * maxTimelinePosition;
+            updated[index] = true;
+        }
     }
 }
 

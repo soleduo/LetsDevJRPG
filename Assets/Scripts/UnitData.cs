@@ -16,15 +16,15 @@ public class UnitData : ScriptableObject
     public int attack;
     public int speed;
 
-    [SerializeField]private List<CommandData> commands;
+    [SerializeField]private List<AbilityData> commands;
 
-    public List<CombatCommandBase> Commands { get; private set; }
+    public List<AbilityBase> Commands { get; private set; }
     public void CreateCommands()
     {
-        Commands = new List<CombatCommandBase>();
+        Commands = new List<AbilityBase>();
         for(int i =0; i < commands.Count; i++)
         {
-            CombatCommandBase _temp = commands[i].Create(this);
+            AbilityBase _temp = commands[i].Create(this);
 
             if (Commands.Count <= i)
             {

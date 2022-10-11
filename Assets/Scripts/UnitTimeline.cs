@@ -9,15 +9,23 @@ public class UnitTimeline
     public float Value { get { return value; } }
     public event FloatEvent onValueChanged;
 
+    int baseValue;
+    int startValue;
+
     public UnitTimeline(int speed)
     {
-        int baseValue = 28 - Mathf.RoundToInt(4 * Mathf.Log(speed) + 1);
+        CalculateStartValue(speed);
+
+        value = startValue;
+        Debug.Log("Value " + value);
+    }
+
+    public void CalculateStartValue(int currentSpeed)
+    {
+        baseValue = 28 - Mathf.RoundToInt(4 * Mathf.Log(currentSpeed) + 1);
         baseValue = Mathf.Clamp(baseValue, 3, 28);
 
-        int startValue = Random.Range(baseValue, (Mathf.FloorToInt(baseValue / 3) + 1) * 3);
-
-        value = startValue + 72;
-        Debug.Log("Value " + value);
+        startValue = 68 + Random.Range(baseValue, (Mathf.FloorToInt(baseValue / 3) + 1) * 3);
     }
 
     public void Update()
@@ -25,9 +33,11 @@ public class UnitTimeline
         if (CombatUtility.TimelineSpeed < 0)
             return;
 
-        if (value <= 0)
+        if(value <= 0)
         {
-            value = 100;
+            value = startValue;
+            onValueChanged?.Invoke(value);
+
             return;
         }
 

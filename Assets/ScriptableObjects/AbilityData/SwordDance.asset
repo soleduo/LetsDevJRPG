@@ -9,14 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb6ca0f5e4249104ea11cdfa5dc17930, type: 3}
-  m_Name: Enemy
+  m_Script: {fileID: 11500000, guid: e9ed6ad920846464a86c7c5a64cfd274, type: 3}
+  m_Name: SwordDance
   m_EditorClassIdentifier: 
-  maxHitPoint: 32
-  currentHitPoint: 32
-  attack: 6
-  speed: 10
-  commands:
-  - name: Attack
-    value: 50
-    type: 0
+  name: Sword Dance
+  value: 150
+  description: Increase ATK by {0}% to self for 3 turns
+  type: 1
